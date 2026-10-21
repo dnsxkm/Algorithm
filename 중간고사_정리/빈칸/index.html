@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>알고리즘 빈칸 노트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 퀴즈 페이지와 같은 팔레트. <x>정답</x> 이 빈칸으로 바뀐다 (스크립트 참고) */
+:root{
+  --paper:#f3f5f8; --card:#ffffff; --ink:#1a2230; --muted:#5b6575; --line:#d5dbe4;
+  --omr:#2456c7; --omr-soft:#e3ebfb; --ok:#2b8a3e; --ok-soft:#e6f4ea; --bad:#c92a2a; --bad-soft:#fdecec;
+  --show:#b35c00; --show-soft:#fff1de;
+  --hl:#fff176; --hl-ink:#5c4b00; --code-bg:#eef1f5;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151c; --card:#1a1f28; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2e3542;
+  --omr:#7ea2ff; --omr-soft:#1f2a45; --ok:#51cf66; --ok-soft:#1c3324; --bad:#ff6b6b; --bad-soft:#3a1e1e;
+  --show:#ffa94d; --show-soft:#3a2a14;
+  --hl:#5c5214; --hl-ink:#fff3a8; --code-bg:#232a35; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#11151c; --card:#1a1f28; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2e3542;
+  --omr:#7ea2ff; --omr-soft:#1f2a45; --ok:#51cf66; --ok-soft:#1c3324; --bad:#ff6b6b; --bad-soft:#3a1e1e;
+  --show:#ffa94d; --show-soft:#3a2a14;
+  --hl:#5c5214; --hl-ink:#fff3a8; --code-bg:#232a35; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.9;padding:28px 16px 96px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.wrap>*{min-width:0}
+header h1{font-size:1.6rem;margin:0;line-height:1.3;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+header a{color:var(--omr)}
+.howto{font-size:.85rem;color:var(--muted);line-height:1.6;margin:8px 0 0;padding-left:18px}
+kbd{font-family:var(--f-mono);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--card)}
+
+/* 상단 고정 바 */
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{font:inherit;font-size:.85rem;border:0;background:var(--card);color:var(--ink);padding:5px 12px;cursor:pointer;line-height:1.5}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn{font:inherit;font-size:.85rem;padding:5px 12px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;line-height:1.5}
+.btn:hover{border-color:var(--omr)}
+.score{margin-left:auto;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.score b{color:var(--ok)}
+.meter{flex-basis:100%;height:4px;background:var(--code-bg);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+button:focus-visible,input:focus-visible,select:focus-visible,.bl:focus-visible{outline:2px solid var(--omr);outline-offset:2px}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:6px}
+nav.toc a{font-size:.78rem;padding:1px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted);text-decoration:none;white-space:nowrap;line-height:1.7}
+nav.toc a:hover{border-color:var(--omr);color:var(--omr)}
+
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;scroll-margin-top:120px}
+section > h2{font-size:1.15rem;margin:0 0 4px;line-height:1.4;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+section > h2 .sc{font-size:.75rem;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+section > h2 .rv{margin-left:auto;font-size:.75rem;padding:1px 9px}
+h3{font-size:1rem;margin:16px 0 2px;line-height:1.4}
+ul,ol{margin:4px 0;padding-left:22px}
+li{margin:2px 0}
+li.hot{background:color-mix(in srgb,var(--hl) 40%,transparent);border-radius:4px;padding:0 6px}
+p{margin:6px 0}
+.note{font-size:.85rem;color:var(--muted)}
+.tw{overflow-x:auto;margin:6px 0}
+table{border-collapse:collapse;font-size:.9rem;min-width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--code-bg);font-weight:500;white-space:nowrap}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);padding:10px 12px;border-radius:6px;overflow-x:auto;font-family:var(--f-mono);font-size:.85rem;line-height:2;margin:8px 0}
+details{margin:8px 0;font-size:.9rem}
+summary{cursor:pointer;color:var(--omr)}
+details img{max-width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;margin-top:6px}
+
+/* 빈칸 */
+.bl{display:inline-block;position:relative;vertical-align:baseline;margin:0 2px;line-height:1.5}
+.bl input{font:inherit;font-size:.92em;color:var(--ink);background:var(--paper);border:0;border-bottom:2px solid var(--omr);border-radius:4px 4px 0 0;padding:0 5px;min-width:3em;max-width:100%}
+.bl input::placeholder{color:var(--muted);opacity:.6}
+.bl .ans{display:none;font-weight:500;padding:0 5px;border-radius:4px}
+.bl.ok input{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:500}
+.bl.bad input{border-color:var(--bad);background:var(--bad-soft)}
+.bl.shown input{display:none}
+.bl.shown .ans{display:inline;background:var(--show-soft);color:var(--show)}
+/* 탭 모드 */
+body.tap .bl input{display:none}
+body.tap .bl{cursor:pointer;background:var(--code-bg);border-bottom:2px dashed var(--muted);border-radius:4px 4px 0 0;min-height:1.4em}
+body.tap .bl:not(.shown):not(.ok)::after{content:"\00a0";}
+body.tap .bl.shown,body.tap .bl.ok{background:transparent;border-bottom-color:transparent}
+body.tap .bl.ok .ans{display:inline;background:var(--ok-soft);color:var(--ok)}
+@media (prefers-reduced-motion:no-preference){.bl.bad{animation:shake .25s}@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}}
+footer{font-size:.8rem;color:var(--muted);text-align:center}
+footer a{color:var(--omr)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>알고리즘 중간고사 빈칸 노트 (Ch.1~4)</h1>
+  <p><a href="https://github.com/dnsxkm/Algorithm/blob/main/중간고사_정리/알고리즘_중간고사_핵심요약.md">알고리즘 중간고사 핵심 요약</a> 내용을 그대로 빈칸으로 만들었어요. 노란 줄은 수업에서 강조한 부분(⭐)이고, 📘는 교재에만 있는 내용(20%)이에요.</p>
+  <ul class="howto">
+    <li><b>입력 모드</b>: 빈칸에 쓰고 <kbd>Enter</kbd>를 누르면 채점돼요. 띄어쓰기와 괄호는 무시하고, <code>n²</code>·<code>n^2</code>·<code>n2</code>, <code>lg</code>·<code>log</code>, <code>&lt;=</code>·<code>≤</code>는 같은 답으로 봐요. 틀린 채로 한 번 더 <kbd>Enter</kbd>를 누르거나 <kbd>Esc</kbd>를 누르면 정답이 보여요.</li>
+    <li><b>탭 모드</b>: 빈칸을 누를 때마다 정답이 보였다 가려져요.</li>
+    <li>"성질 4가지"처럼 여러 개를 나열하는 빈칸은 순서와 상관없이 맞으면 정답이에요.</li>
+  </ul>
+</header>
+
+<div class="bar" role="toolbar" aria-label="빈칸 도구">
+  <div class="seg" role="group" aria-label="모드">
+    <button type="button" id="m-type" aria-pressed="true">입력 모드</button>
+    <button type="button" id="m-tap" aria-pressed="false">탭 모드</button>
+  </div>
+  <button type="button" class="btn" id="all-show">정답 모두 보기</button>
+  <button type="button" class="btn" id="reset">초기화</button>
+  <span class="score" id="score" aria-live="polite"></span>
+  <div class="meter"><i id="meter"></i></div>
+</div>
+
+<nav class="toc" aria-label="목차">
+  <a href="#c0">0 체크리스트</a><a href="#w1">1주</a><a href="#w2">2주</a><a href="#w3">3주</a><a href="#w4">4주</a><a href="#w5">5주</a><a href="#w6">6주</a><a href="#w7">7주</a><a href="#tb">📘 교재</a><a href="#sum">요약표</a>
+</nav>
+
+<!-- ───────── 0 ───────── -->
+<section id="c0">
+<h2>0. 시험 직전 체크리스트</h2>
+<ul>
+  <li class="hot">마스터 정리 답안은 <x>단계별</x>로 쓴다 (결과만 쓰면 감점)
+    <br>① 일반형 ② a, b, f(n) ③ a ≥ <x>1</x>, b &gt; <x>1</x> 확인 ④ 기준값 n^(<x a="logba">log_b a</x>) ⑤ 케이스 판별 (Case 3이면 <x a="정규성">정규성 조건</x>) ⑥ 결론</li>
+  <li>T(n) = T(n−1) + n → 마스터 정리 적용 <x>불가</x> → 직접 펼쳐서 Θ(<x>n²</x>)</li>
+  <li>O / Ω / Θ / o 정의를 <x g="cn">c</x>, <x g="cn">N</x>을 써서 쓸 수 있는가</li>
+  <li>극한으로 차수 판정: 상수 → <x>Θ</x>, 0 → <x>o</x>, ∞ → 반대 방향 o</li>
+  <li>Partition 손 추적: 마지막 <x a="pivotswap|swap">pivot swap</x> 빼먹지 말기</li>
+  <li>Prim을 <x g="pa">distance</x> / <x g="pa">nearest</x> 배열로 추적, Θ(<x>n²</x>)인 이유</li>
+  <li class="hot">MST <x>≠</x> 최단경로 (Prim의 distance ≠ <x>Dijkstra</x>의 distance)</li>
+</ul>
+</section>
+
+<!-- ───────── 1주 ───────── -->
+<section id="w1">
+<h2>1주차 — 알고리즘이란 (Ch.1.1)</h2>
+<ul>
+  <li><b>알고리즘</b>: 문제를 푸는 명확하게 정의된 <x>유한</x>한 단계. 입력 → 처리 → 출력</li>
+  <li>핵심 성질 4가지: <x g="p4">정확성</x> · <x g="p4">유한성</x> · <x g="p4">명확성</x> · <x g="p4">효율성</x></li>
+  <li>품질 4요소: 정확성 · 효율성 · <x>견고성</x>(Robustness, 엣지 케이스·입력 검증) · 명확성(Clarity)</li>
+  <li>의사코드는 특정 <x>언어</x>에 독립적. Max(A[1..n])의 비교 횟수 = <x>n−1</x>회 → O(n)</li>
+</ul>
+<div class="tw"><table>
+  <tr><th></th><th>선형 탐색</th><th>이진 탐색</th></tr>
+  <tr><th>복잡도</th><td>O(<x>n</x>)</td><td>O(<x>log n</x>)</td></tr>
+  <tr><th>전제</th><td>없음</td><td><x>정렬</x> 필수</td></tr>
+  <tr><th>100만 건</th><td>평균 50만 번 비교</td><td>최대 약 <x>20</x>번</td></tr>
+</table></div>
+<ul>
+  <li class="hot">트레이드오프: <x>정렬 비용</x> vs <x>탐색 빈도</x>. 1번만 찾으면 <x>선형</x> 탐색, 여러 번 찾으면 미리 정렬(O(<x>n log n</x>)) 후 이진 탐색</li>
+</ul>
+</section>
+
+<!-- ───────── 2주 ───────── -->
+<section id="w2">
+<h2>2주차 — 복잡도와 점근 표기 (Ch.1.2~1.4)</h2>
+<ul>
+  <li><b>Basic operation</b>: 수행 시간을 대표하는 핵심 연산 (정렬은 <x>비교</x>, 합산은 <x>덧셈</x>). 실제 시간 대신 <x>연산 횟수</x>로 추상화</li>
+  <li>basic operation 1ns, 입력 10억이면 이차 알고리즘 ≈ <x>31.7</x>년, n ln n 알고리즘 ≈ <x>29.9</x>초</li>
+  <li>공간복잡도: sum, i 같은 변수만 쓰면 O(<x>1</x>), 크기 n 배열을 추가하면 O(<x>n</x>)</li>
+  <li><code>for i=1..n: for j=i+1..n: count++</code> → 횟수 <x>n(n−1)/2</x> → O(n²)</li>
+  <li>Order는 <x>최고차항</x>만 본다: 3n+7 → <x>n</x>, 5n³+n²+100 → <x>n³</x></li>
+  <li>100n vs 0.01n²: n &lt; <x a="10000">10,000</x>이면 이차식이 더 빠를 수 있음</li>
+</ul>
+<h3>⭐⭐ 점근 표기 정의</h3>
+<div class="tw"><table>
+  <tr><th>표기</th><th>정의</th><th>의미</th></tr>
+  <tr><td>g(n) ∈ O(f(n))</td><td><x>어떤</x> c &gt; 0, N이 존재해 모든 n ≥ N에서 g(n) <x>≤</x> c·f(n)</td><td>점근적 <x>상한</x></td></tr>
+  <tr><td>g(n) ∈ Ω(f(n))</td><td>어떤 c &gt; 0, N이 존재해 모든 n ≥ N에서 g(n) <x>≥</x> c·f(n)</td><td>점근적 <x>하한</x></td></tr>
+  <tr><td>g(n) ∈ Θ(f(n))</td><td>c·f(n) ≤ g(n) ≤ d·f(n) = <x a="O∩Ω|O교집합Ω">O ∩ Ω</x></td><td><x>같은 차수</x></td></tr>
+  <tr><td>g(n) ∈ o(f(n))</td><td><x>모든</x> 양의 c에 대해 N이 존재해 n ≥ N에서 g(n) <x>&lt;</x> c·f(n)</td><td><x a="엄격히낮은차수|더낮은차수">엄격히 더 낮은 차수</x></td></tr>
+</table></div>
+<ul>
+  <li>n² + 10n ∈ O(n²): c = <x>2</x>, N = <x>10</x></li>
+  <li>⚠️ 오해 3가지: ① Big-O는 정확한 실행 시간이 아니라 <x>상한</x> ② n ∈ O(n²)도 <x>참</x> ③ c와 N은 <x a="유일하지않음">유일하지 않음</x></li>
+  <li>n ∈ O(n²)이지만 n <x>∉</x> Θ(n²) / n² ∈ Θ(n²)이지만 n² <x>∉</x> o(n²)</li>
+  <li>Theorem 1.2: g ∈ o(f) ⇒ g ∈ O(f) − <x>Ω(f)</x></li>
+</ul>
+<h3>⭐ 극한으로 차수 판정 (Theorem 1.3)</h3>
+<pre>lim g(n)/f(n) = c &gt; 0  →  g ∈ <x>Θ</x>(f)
+              = 0      →  g ∈ <x>o</x>(f)
+              = ∞      →  <x>f</x> ∈ o(<x>g</x>)</pre>
+<ul>
+  <li>(n log n)/n² = log n / n → <x>0</x> ⇒ n log n ∈ o(n²)</li>
+  <li><x a="로피탈|lhopital">L'Hôpital</x>: lim (log x)/x = lim (1/x)/1 = 0 ⇒ log n ∈ o(n)</li>
+  <li class="hot">성장률 순서: 1 &lt; <x>log n</x> &lt; n &lt; <x>n log n</x> &lt; n² &lt; n³ &lt; <x a="2^n">2ⁿ</x> &lt; <x>n!</x></li>
+  <li>미니 퀴즈: n³+n의 차수 Θ(<x>n³</x>) / n² ∈ Ω(n)? <x a="O|참">예</x> / n ∈ o(n²)? <x a="O|참">예</x></li>
+</ul>
+</section>
+
+<!-- ───────── 3주 ───────── -->
+<section id="w3">
+<h2>3주차 — 분할정복: 이진 탐색, 합병 정렬 (Ch.2)</h2>
+<ul>
+  <li>분할정복 3단계: <x>Divide</x>(같은 구조의 작은 문제로) → <x>Conquer</x>(재귀로 해결) → <x>Combine</x>(합침). 이진 탐색은 <x>Combine</x>이 거의 없음</li>
+  <li>이진 탐색: T(n) = T(<x>n/2</x>) + c → Θ(<x>log n</x>)</li>
+  <li><x>정렬</x>돼 있어야 "가운데보다 크면 왼쪽엔 없다" → 절반을 버릴 수 있음</li>
+  <li><code>[3,7,11,18,25,31,42,56,63,77,81]</code>에서 42 찾기: mid 값 31 → <x>63</x> → 42 (<x>3</x>번)</li>
+  <li class="hot">합병 정렬: Divide는 쉽고 <x a="merge|Combine">Combine(merge)</x>이 핵심. merge는 두 포인터로 Θ(<x>n</x>)</li>
+  <li>T(n) = <x>2</x>T(n/2) + cn → 레벨마다 cn × 레벨 log n개 = Θ(<x>n log n</x>) (항상)</li>
+  <li>추가 메모리 O(<x>n</x>). 비교 기반 정렬 하한 Θ(n log n) → 점근적으로 <x>최적</x></li>
+</ul>
+<div class="tw"><table>
+  <tr><th></th><th>이진 탐색</th><th>합병 정렬</th></tr>
+  <tr><th>점화식</th><td>T(n/2) + c</td><td>2T(n/2) + cn</td></tr>
+  <tr><th>재귀 호출</th><td><x>1</x>개</td><td><x>2</x>개</td></tr>
+  <tr><th>결합 비용</th><td><x>상수</x></td><td><x>선형</x></td></tr>
+</table></div>
+</section>
+
+<!-- ───────── 4주 ───────── -->
+<section id="w4">
+<h2>4주차 — 마스터 정리, 퀵 정렬, Strassen (Ch.2)</h2>
+<h3>⭐⭐ 마스터 정리</h3>
+<pre>T(n) = a·T(n/b) + f(n),   a ≥ <x>1</x>, b &gt; <x>1</x>     기준값: n^(<x a="logba">log_b a</x>)</pre>
+<div class="tw"><table>
+  <tr><th>Case</th><th>조건</th><th>결과</th><th>직관</th></tr>
+  <tr><td>1</td><td>f(n) = O(n^(log_b a − ε)), ε &gt; 0</td><td>Θ(<x a="n^logba">n^(log_b a)</x>)</td><td><x a="재귀|리프">재귀(리프)</x>가 지배</td></tr>
+  <tr><td>2</td><td>f(n) = Θ(n^(log_b a) · logᵏn), k ≥ 0</td><td>Θ(n^(log_b a) · log^(<x>k+1</x>) n)</td><td>비슷함</td></tr>
+  <tr><td>3</td><td>f(n) = Ω(n^(log_b a + ε)) 그리고 a·f(n/b) ≤ c·f(n), c &lt; <x>1</x></td><td>Θ(<x>f(n)</x>)</td><td><x a="분할결합">분할·결합</x>이 지배</td></tr>
+</table></div>
+<p><b>답안 예시</b> — T(n) = 4T(n/2) + n: a = <x>4</x>, b = <x>2</x>, f(n) = n → n^(log₂4) = <x>n²</x> → f(n) = O(n^(2−ε)), ε = 1 → Case <x>1</x> → T(n) = Θ(<x>n²</x>)</p>
+<div class="tw"><table>
+  <tr><th>점화식</th><th>답</th></tr>
+  <tr><td>2T(n/2) + n</td><td>Θ(<x>n log n</x>) (Case <x>2</x>)</td></tr>
+  <tr><td>2T(n/2) + n²</td><td>Θ(<x>n²</x>) (Case <x>3</x>, 정규성 2(n/2)² = ½n²)</td></tr>
+  <tr><td>8T(n/2) + n²</td><td>Θ(<x>n³</x>) (Case 1)</td></tr>
+  <tr><td>7T(n/2) + n²</td><td>Θ(n^(<x a="log_27|log27|lg7">log₂7</x>)) ≈ Θ(n^2.81)</td></tr>
+  <tr><td>T(n/2) + 1</td><td>Θ(<x>log n</x>) (Case 2)</td></tr>
+  <tr><td>3T(n/3) + n log n</td><td>Θ(<x a="nlog^2n">n log² n</x>) (Case 2, k=1)</td></tr>
+  <tr><td>T(n−1) + n</td><td><x>적용 불가</x> → 펼쳐서 n(n+1)/2 = Θ(n²)</td></tr>
+</table></div>
+
+<h3>퀵 정렬</h3>
+<ul>
+  <li><x>Hoare</x>(1960). Pivot 기준으로 작은 것 왼쪽 / 큰 것 오른쪽 → pivot은 <x>최종 위치</x> 확정 → 양쪽 재귀</li>
+  <li class="hot"><x a="partition">분할(partition)</x>이 핵심, <x>결합</x> 없음 (합병 정렬은 분할이 단순하고 merge가 핵심)</li>
+  <li>중앙값을 pivot으로 못 쓰는 이유: 중앙값을 알려면 <x>정렬</x>해야 하는데 지금 정렬 중이라서</li>
+</ul>
+<pre>partition(A, low, high):
+    pivot ← A[<x>low</x>]; j ← low
+    for i ← low+1 to high:
+        if A[i] &lt; pivot: j ← <x>j+1</x>; swap(A[i], A[j])
+    swap(A[low], A[<x>j</x>])          // 마지막 pivot swap
+    return j</pre>
+<ul>
+  <li>수업 추적: <code>[7,2,1,6,8,5,3,4]</code>, pivot 7 → [<x a="4,2,1,6,5,3,7,8">4,2,1,6,5,3,7,8</x>], 7은 인덱스 <x>6</x></li>
+</ul>
+<div class="tw"><table>
+  <tr><th></th><th>Best</th><th>Average</th><th>Worst</th></tr>
+  <tr><th>상황</th><td>항상 중앙값</td><td>무작위</td><td>항상 최소/최대 (<x a="정렬된|이미정렬">이미 정렬된</x> 배열 + 고정 pivot)</td></tr>
+  <tr><th>점화식</th><td>2T(n/2) + n</td><td>(2/n)ΣT(k) + n</td><td>T(<x>n−1</x>) + n</td></tr>
+  <tr><th>결과</th><td>Θ(n log n)</td><td>Θ(<x>n log n</x>)</td><td>Θ(<x>n²</x>)</td></tr>
+</table></div>
+<ul>
+  <li>그래도 쓰는 이유: 평균 n log n, <x a="inplace|제자리">in-place</x>(재귀 스택 O(<x>log n</x>)), 상수 작음·캐시 효율</li>
+  <li>최악 회피: <x g="qa" a="랜덤피벗|randompivot">random pivot</x>, <x g="qa" a="medianofthree|중앙값3">median-of-three</x>, 작은 구간은 insertion sort, introsort</li>
+</ul>
+
+<h3>행렬 곱셈과 Strassen</h3>
+<ul>
+  <li>표준 3중 루프: Θ(<x>n³</x>)</li>
+  <li class="hot">4블록 단순 분할: 부분행렬 곱 <x>8</x>번 → T(n) = 8T(n/2) + Θ(n²) = Θ(<x>n³</x>). "분할했다고 다가 아니다" — <x>a</x>를 줄여야 지수가 내려간다</li>
+  <li>Strassen(1969): 곱셈 8 → <x>7</x>, 덧셈·뺄셈 증가 → T(n) = 7T(n/2) + Θ(n²) = Θ(n^<x>2.81</x>)</li>
+</ul>
+<pre>M1=(A11+A22)(<x>B11+B22</x>)  M2=(A21+A22)B11  M3=A11(B12−B22)  M4=A22(B21−B11)
+M5=(A11+A12)B22        M6=(A21−A11)(B11+B12)  M7=(A12−A22)(B21+B22)
+C11=M1+M4−M5+<x>M7</x>   C12=M3+<x>M5</x>   C21=M2+<x>M4</x>   C22=M1−M2+M3+<x>M6</x></pre>
+<ul>
+  <li>실제로 항상 빠르지 않은 이유 3가지: <x g="st" a="재귀오버헤드|오버헤드">재귀 호출 오버헤드</x>, <x g="st" a="수치안정성">수치 안정성</x>, <x g="st" a="캐시">캐시 효율</x> → <x a="임계값">threshold</x> 이하는 표준 알고리즘</li>
+  <li>진짜 하한은 <x>미해결</x>. 행렬 곱은 원소끼리 독립이라 <x>병렬</x> 처리 예제로 자주 쓰임</li>
+</ul>
+</section>
+
+<!-- ───────── 5주 ───────── -->
+<section id="w5">
+<h2>5주차 — DP: 이항계수, Floyd (Ch.3.1~3.2)</h2>
+<ul>
+  <li>같은 부분 문제가 <x>반복</x>되면 저장해서 재사용 (<x>메모이제이션</x> top-down / 테이블 bottom-up)</li>
+  <li class="hot">적용 조건: <x g="dp2">최적 부분 구조</x> + <x g="dp2">중복 부분 문제</x></li>
+  <li>설계 4단계: 상태 정의 → <x>점화식</x> → <x>초기값</x> → <x>계산 순서</x></li>
+  <li>분할정복의 부분 문제는 <x>독립</x>적, DP의 부분 문제는 <x>겹침</x></li>
+</ul>
+<h3>이항계수</h3>
+<pre>B[i][j] = B[i−1][<x>j−1</x>] + B[i−1][<x>j</x>]   (0 &lt; j &lt; i)
+B[i][0] = B[i][i] = <x>1</x></pre>
+<ul>
+  <li>순수 재귀는 <x>지수</x> 시간(중복 계산), DP는 Θ(<x>nk</x>), 1차원 배열로 공간 O(<x>k</x>) 가능 (j를 <x>역방향</x>으로)</li>
+  <li>C(6,3) = <x>20</x></li>
+</ul>
+<h3>⭐⭐ Floyd(-Warshall)</h3>
+<pre>D⁽ᵏ⁾[i][j] = min( D⁽ᵏ⁻¹⁾[i][j],  D⁽ᵏ⁻¹⁾[i][<x>k</x>] + D⁽ᵏ⁻¹⁾[<x>k</x>][j] )
+D⁽⁰⁾ = 인접 행렬 W (i=j면 <x>0</x>, 간선 없으면 <x a="inf|무한대">∞</x>)</pre>
+<ul>
+  <li class="hot">3중 루프에서 <x>k</x>가 반드시 가장 바깥. 이유: D⁽ᵏ⁾를 구하려면 D⁽ᵏ⁻¹⁾가 <x>완전히</x> 완성돼 있어야 함</li>
+  <li>시간 Θ(<x>n³</x>), 공간 Θ(<x>n²</x>). in-place 가능: k단계에서 <x g="kk">k행</x>·<x g="kk">k열</x>은 안 바뀜</li>
+  <li>음수 간선 처리 가능, 음수 사이클은 끝난 뒤 D[i][i] <x>&lt; 0</x>으로 감지만 가능</li>
+  <li>예제(1→2:3, 1→4:7, 2→3:2, 2→4:5, 3→4:1): k=2에서 D[1][3] = <x>5</x>, k=3에서 D[1][4] = <x>6</x>, D[2][4] = <x>3</x></li>
+</ul>
+</section>
+
+<!-- ───────── 6주 ───────── -->
+<section id="w6">
+<h2>6주차 — DP 최적화: 연쇄행렬곱셈, 최적 BST (Ch.3.3~3.5)</h2>
+<ul>
+  <li><b>최적화 문제</b>: 가능한 해(<x a="feasiblesolution|feasible">feasible solution</x>)가 여러 개이고 그중 비용 최소 / 이익 최대를 찾는 문제</li>
+  <li class="hot"><b>최적성의 원리</b>: 문제의 최적해는 <x a="부분문제의최적해|부분최적해">부분 문제의 최적해</x>를 포함한다. 이게 성립해야 DP 적용 가능</li>
+</ul>
+<h3>⭐⭐ 연쇄행렬곱셈</h3>
+<ul>
+  <li>A_i의 크기 = d[<x>i−1</x>] × d[<x>i</x>]. (p×q)·(q×r) 곱셈 = <x a="p·q·r|pqr">p·q·r</x>번</li>
+  <li>d = [10, 100, 5, 50]: (A1A2)A3 = <x a="7,500">7500</x> / A1(A2A3) = <x a="75,000">75000</x></li>
+  <li>괄호 방법 수는 <x a="카탈란">카탈란 수</x> → 지수적</li>
+</ul>
+<pre>M[i][i] = 0
+M[i][j] = min_{i ≤ k &lt; j} ( M[i][k] + M[<x>k+1</x>][j] + d[<x>i−1</x>]·d[<x>k</x>]·d[<x>j</x>] )</pre>
+<ul>
+  <li>P[i][j] = 최소를 만든 <x>k</x> (괄호 복원용)</li>
+  <li class="hot"><x a="대각선">diagonal</x> 순서(구간 길이 짧은 것부터)인 이유: M[i][j]는 더 <x>짧은</x> 구간 값만 참조. "DP는 <x>계산 순서</x>가 곧 알고리즘 구조다"</li>
+  <li>복잡도: 부분 문제 O(n²) × 분할점 O(n) = O(<x>n³</x>) 시간, O(<x>n²</x>) 공간</li>
+</ul>
+<p><b>⭐ 예제</b>: d = [5, 2, 3, 4, 6]</p>
+<div class="tw"><table>
+  <tr><th>계산</th><th>결과</th></tr>
+  <tr><td>M[1][2] = 5·2·3</td><td><x>30</x></td></tr>
+  <tr><td>M[2][3] = 2·3·4</td><td><x>24</x></td></tr>
+  <tr><td>M[3][4] = 3·4·6</td><td><x>72</x></td></tr>
+  <tr><td>M[1][3] = min(k=1: 0+24+5·2·4, k=2: 30+0+5·3·4)</td><td><x>64</x>, P = <x>1</x></td></tr>
+  <tr><td>M[2][4] = min(k=2: 0+72+2·3·6, k=3: 24+0+2·4·6)</td><td><x>72</x>, P = <x>3</x></td></tr>
+  <tr><td>M[1][4] = min(k=1, 2, 3)</td><td><x>132</x>, P = <x>1</x></td></tr>
+</table></div>
+<ul>
+  <li>최적 순서: <x s>A1((A2A3)A4)</x></li>
+  <li>복원은 P만 따라감 → O(<x>n</x>). 계산(O(n³))과 복원은 별개 알고리즘</li>
+</ul>
+<h3>⭐⭐ 최적 이진탐색트리</h3>
+<ul>
+  <li>평균 탐색 비용 Σ pᵢ·(<x a="깊이+1">깊이ᵢ + 1</x>) 최소인 BST. (깊이+1) = <x>비교 횟수</x></li>
+  <li class="hot">최적 BST <x>≠</x> 균형 BST. 자주 찾는 키를 루트 가까이</li>
+  <li><x>Greedy</x>(빈도 최대를 루트로)로는 전역 최적 보장 안 됨 → DP 필요</li>
+</ul>
+<pre>A[i][j] = 0                (i &gt; j, 빈 구간)
+A[i][i] = <x a="pi|p_i">pᵢ</x>
+A[i][j] = min_{i ≤ k ≤ j} ( A[i][<x>k−1</x>] + A[<x>k+1</x>][j] ) + <x a="Σp|W(i,j)|Σpm|Σp_m">Σ p_m</x></pre>
+<ul>
+  <li class="hot">Σp_m을 더하는 이유: 루트 Kₖ 아래 붙으면 부분트리의 모든 키 <x>깊이</x>가 <x>1</x> 증가</li>
+  <li>연쇄행렬곱과 차이: 분할점 i ≤ k <x>&lt;</x> j vs 루트 i ≤ k <x>≤</x> j / 추가 항 d·d·d vs <x a="Σp|W(i,j)">W(i,j)</x></li>
+  <li>R[i][j] = 최적 <x>루트</x>. 시간 O(<x>n³</x>), 공간 O(n²)</li>
+</ul>
+<p><b>⭐ 예제</b>: p1 = 3 (A), p2 = 2 (B), p3 = 5 (C)</p>
+<div class="tw"><table>
+  <tr><th>계산</th><th>결과</th></tr>
+  <tr><td>A[1][2], W=5 — k=1: 0+2+5 / k=2: 3+0+5</td><td><x>7</x>, R = <x>1</x></td></tr>
+  <tr><td>A[2][3], W=7 — k=2: 0+5+7 / k=3: 2+0+7</td><td><x>9</x>, R = <x>3</x></td></tr>
+  <tr><td>A[1][3], W=10 — k=1: 0+9+10 / k=2: 3+5+10 / k=3: 7+0+10</td><td><x>17</x>, R = <x>3</x></td></tr>
+</table></div>
+<ul>
+  <li>최적 트리: 루트 <x>C</x>, C의 왼쪽 자식 <x>A</x>, A의 오른쪽 자식 <x>B</x></li>
+  <li>비교: B 루트(균형) = <x>18</x>, A 루트 = <x>19</x></li>
+</ul>
+<h3>두 문제의 공통 뼈대</h3>
+<div class="tw"><table>
+  <tr><th></th><th>연쇄행렬곱셈</th><th>최적 BST</th></tr>
+  <tr><th>핵심 질문</th><td>어디서 나눌까 (<x>분할점</x> k)</td><td>누구를 <x>루트</x>로</td></tr>
+  <tr><th>비용 표 / 선택 표</th><td>M / <x>P</x></td><td>A / <x>R</x></td></tr>
+</table></div>
+<p class="hot" style="background:color-mix(in srgb,var(--hl) 40%,transparent);border-radius:4px;padding:0 6px">DP 원칙: <x>최적값</x>과 <x>최적 선택</x>을 쌍으로 저장해야 실제 해를 복원할 수 있다</p>
+</section>
+
+<!-- ───────── 7주 ───────── -->
+<section id="w7">
+<h2>7주차 — Greedy, MST, Prim (Ch.4)</h2>
+<ul>
+  <li>Greedy: 매 단계 지금 가장 좋아 보이는 선택 하나를 즉시 <x>확정</x>, <x>번복</x>하지 않음</li>
+  <li class="hot">최적 보장 조건: <x g="gr" a="탐욕선택속성|GreedyChoiceProperty">탐욕적 선택 속성</x> + <x g="gr">최적 부분 구조</x> → 반드시 <x>검증</x> 필요</li>
+  <li>Greedy 예: MST(Prim, <x>Kruskal</x>), 활동 선택, <x>Huffman</x> / 실패 예: <x a="01knapsack|knapsack|0-1배낭">0-1 Knapsack</x>, 최적 BST</li>
+</ul>
+<h3>Spanning Tree와 MST</h3>
+<ul>
+  <li>Spanning Tree: ① 모든 <x>정점</x> 포함 ② 간선 정확히 <x>n−1</x>개 ③ <x>사이클</x> 없음 ④ 연결됨</li>
+  <li><b>MST</b>: 모든 spanning tree 중 간선 가중치 <x>합</x>이 최소인 것</li>
+  <li><x>연결</x> 그래프에서만 정의 (비연결이면 <x a="spanningforest|신장숲">spanning forest</x>)</li>
+  <li>가중치가 모두 다르면 MST는 <x>유일</x>, 같은 값이 있으면 여러 개일 수 있음</li>
+  <li class="hot">MST ≠ 최단경로(<x>Dijkstra</x>). MST는 <x a="전체연결비용|연결비용">전체 연결 비용</x> 최소</li>
+</ul>
+<h3>⭐⭐ Prim 알고리즘</h3>
+<ul>
+  <li>정점 집합 Y와 V−Y를 잇는 간선 중 <x>최소</x> 가중치를 골라 그 정점을 Y에 추가. Y = V가 되면 종료 (<x>n−1</x>번 선택)</li>
+  <li class="hot">"전체 그래프에서 가장 싼 간선"이 아니라 "<x a="현재트리에연결된|트리에연결된">현재 트리에 연결된</x> 간선 중 가장 싼 것" (전체에서 고르는 건 <x>Kruskal</x>)</li>
+  <li>근거: <x a="컷속성|cut">Cut Property</x> — Y와 V−Y를 가로지르는 가장 가벼운 간선은 어떤 MST에 반드시 포함됨</li>
+  <li><b>nearest[i]</b> = Y 안에서 vᵢ와 가장 가깝게 연결되는 정점의 인덱스 (초기 <x>1</x>)</li>
+  <li><b>distance[i]</b> = vᵢ를 현재 트리에 붙이는 최소 비용 (초기 W[1][i]). <x>−1</x>이면 이미 Y에 포함</li>
+</ul>
+<pre>repeat (<x>n−1</x>) times:
+    min ← ∞
+    for i = 2..n:                              // ① 최솟값 탐색 O(n)
+        if 0 ≤ distance[i] &lt; min: min ← distance[i]; vnear ← i
+    F ← F ∪ {(<x>nearest[vnear]</x>, vnear)}          // ② 간선 추가
+    distance[vnear] ← <x>−1</x>
+    for i = 2..n:                              // ③ 갱신 O(n)
+        if W[i][vnear] &lt; distance[i]:
+            distance[i] ← W[i][vnear]; nearest[i] ← <x>vnear</x></pre>
+<ul>
+  <li class="hot">Prim의 distance = "현재 <x>트리</x>와 v를 잇는 최소 비용" / Dijkstra의 distance = "<x>출발점</x>에서 v까지 최단 경로 비용"</li>
+  <li>복잡도: (n−1)번 × (O(n) 탐색 + O(n) 갱신) = Θ(<x>n²</x>) (every-case). 교재: T(n) = <x>2(n−1)(n−1)</x></li>
+  <li>이진 힙 O((n+m) log n) → <x>sparse</x> 그래프 유리 / 인접행렬 Θ(n²)는 <x>dense</x> 그래프에 적합</li>
+</ul>
+<p><b>⭐ 예제</b>: 간선 A-B 1, B-C 2, C-E 2, A-C 3, C-D 4, D-E 5, B-D 6, 시작 A</p>
+<div class="tw"><table>
+  <tr><th>단계</th><th>Y</th><th>선택</th><th>누적</th></tr>
+  <tr><td>1</td><td>{A}</td><td>A-B (1)</td><td>1</td></tr>
+  <tr><td>2</td><td>{A,B}</td><td><x a="BC|B-C(2)">B-C</x> (2)</td><td><x>3</x></td></tr>
+  <tr><td>3</td><td>{A,B,C}</td><td><x a="CE">C-E</x> (2)</td><td><x>5</x></td></tr>
+  <tr><td>4</td><td>{A,B,C,E}</td><td><x a="CD">C-D</x> (4)</td><td><x>9</x></td></tr>
+</table></div>
+<ul>
+  <li>B 추가 후 distance (B, C, D, E 순서): −1, <x>2</x>, <x>6</x>, ∞ / nearest: A, <x>B</x>, <x>B</x>, A</li>
+  <li>사이클이 안 생기는 이유: 매번 트리 <x>밖</x>의 새 정점만 추가</li>
+  <li>항상 연결인 이유: <x>귀납법</x>으로 증명</li>
+  <li>한계: MST 문제 전용, <x>최단경로</x> 문제는 못 풂</li>
+</ul>
+<h3>Prim vs Kruskal</h3>
+<div class="tw"><table>
+  <tr><th></th><th>Prim</th><th>Kruskal</th></tr>
+  <tr><th>기준</th><td><x>정점</x> 중심, 하나의 트리를 키움</td><td><x>간선</x> 중심, 가중치 순 정렬 후 선택</td></tr>
+  <tr><th>사이클 처리</th><td>구조상 안 생김</td><td><x a="UnionFind">Union-Find</x>로 건너뜀</td></tr>
+  <tr><th>복잡도</th><td>Θ(n²) (인접행렬)</td><td>O(<x>E log E</x>)</td></tr>
+  <tr><th>유리</th><td><x>dense</x> 그래프</td><td><x>sparse</x> 그래프</td></tr>
+</table></div>
+</section>
+
+<!-- ───────── 교재 ───────── -->
+<section id="tb">
+<h2>📘 교재 전용 내용 (20%)</h2>
+<h3>Ch.1</h3>
+<ul>
+  <li>입력 값과 상관없이 횟수가 같으면 <x a="everycase">every-case</x> 분석 T(n)</li>
+  <li>순차 탐색 평균 (x가 반드시 있고 위치가 균등): A(n) = <x>(n+1)/2</x></li>
+  <li>교환 정렬 비교 횟수 every-case T(n) = <x>n(n−1)/2</x></li>
+  <li>피보나치: 재귀 버전 계산 항 수 T(n) &gt; <x>2^(n/2)</x> (지수), 반복 버전 <x>n+1</x>개 (선형)</li>
+  <li>a, b &gt; 1이면 log_a n ∈ <x>Θ</x>(log_b n) — 로그 밑은 차수에 <x>무관</x></li>
+  <li>b &gt; a &gt; 0이면 aⁿ ∈ <x>o</x>(bⁿ) — 지수 함수는 밑이 다르면 차수가 다름</li>
+  <li>모든 a &gt; 0에 대해 aⁿ ∈ o(<x>n!</x>)</li>
+</ul>
+<h3>Ch.2</h3>
+<ul>
+  <li>이진 탐색 최악 W(n) = <x a="lgn+1|floorlgn+1">⌊lg n⌋ + 1</x></li>
+  <li>합병 정렬 최악 비교 횟수 W(n) = n lg n − (<x>n − 1</x>)</li>
+  <li>퀵 정렬 최악 W(n) = <x>n(n−1)/2</x>, 평균 A(n) ≈ <x>1.38</x>(n+1) lg n</li>
+  <li>큰 정수 곱셈: 곱 4번이면 Θ(<x>n²</x>), (x+y)(w+z)를 이용해 곱 <x>3</x>번 → Θ(n^(lg 3)) ≈ Θ(n^<x>1.58</x>)</li>
+  <li>임계값(threshold): 재귀 알고리즘과 단순 알고리즘의 실행 시간이 <x>같아지는</x> n</li>
+  <li class="hot">분할정복을 쓰면 안 되는 경우: ① 크기 n 문제를 거의 <x>n</x> 크기 문제 2개 이상으로 나눌 때 → <x>지수</x> 시간 (예: 재귀 <x>피보나치</x>) ② 크기 n/c인 문제 거의 n개로 나눌 때 → n^Θ(lg n)</li>
+</ul>
+<h3>Ch.3</h3>
+<ul>
+  <li>DP 최적화 문제 3단계: ① 최적해를 주는 재귀 성질 수립 ② <x>상향식</x>으로 최적값 계산 ③ 최적해 <x>구성</x></li>
+  <li class="hot">최적성의 원리가 성립하지 않는 예: <x a="최장단순경로|longestsimplepath">최장 단순 경로</x></li>
+  <li>Floyd 경로 출력: P[i][j] = i→j 최단경로의 가장 큰 인덱스 <x>중간 정점</x> (없으면 0)</li>
+  <li>연쇄행렬곱 정확한 횟수: n(n−1)(n+1)/<x>6</x> ∈ Θ(n³)</li>
+  <li>TSP: 시간 Θ(<x a="n^22^n|n22n">n²·2ⁿ</x>) — 완전탐색 <x>(n−1)!</x>보다 낫지만 여전히 지수</li>
+  <li>서열 정렬: 불일치(mismatch) 벌점 <x>1</x>, 틈(gap) 벌점 <x>2</x>, Θ(<x>mn</x>)</li>
+</ul>
+<h3>Ch.4</h3>
+<ul>
+  <li class="hot">Greedy 구성 3단계: ① <x a="selectionprocedure">선택 절차</x> ② <x a="feasibilitycheck">적정성 검사</x> ③ <x a="solutioncheck">해답 점검</x></li>
+  <li>거스름돈: 12센트 동전이 추가되면 16센트를 greedy는 <x>5</x>개, 최적은 <x>3</x>개 (10+5+1)</li>
+  <li><x a="유망한">Promising</x> 집합: 간선 집합 F가 어떤 <x>MST</x>의 부분집합이면 promising</li>
+  <li>Lemma 4.1: F가 promising이고 e가 Y와 V−Y를 잇는 최소 간선이면 F ∪ {e}도 <x>promising</x></li>
+</ul>
+</section>
+
+<!-- ───────── 요약표 ───────── -->
+<section id="sum">
+<h2>한 장 요약표</h2>
+<div class="tw"><table>
+  <tr><th>알고리즘</th><th>전략</th><th>복잡도</th></tr>
+  <tr><td>이진 탐색</td><td><x>분할정복</x></td><td>Θ(<x>log n</x>)</td></tr>
+  <tr><td>합병 정렬</td><td>분할정복</td><td>Θ(<x>n log n</x>) 항상</td></tr>
+  <tr><td>퀵 정렬</td><td>분할정복</td><td>평균 Θ(<x>n log n</x>), 최악 Θ(<x>n²</x>)</td></tr>
+  <tr><td>단순 분할 행렬곱</td><td>분할정복</td><td>Θ(<x>n³</x>)</td></tr>
+  <tr><td>Strassen</td><td>분할정복</td><td>Θ(n^<x>2.81</x>)</td></tr>
+  <tr><td>이항계수</td><td><x>DP</x></td><td>Θ(<x>nk</x>)</td></tr>
+  <tr><td>Floyd</td><td><x>DP</x></td><td>Θ(<x>n³</x>)</td></tr>
+  <tr><td>연쇄행렬곱셈</td><td><x>DP</x></td><td>Θ(<x>n³</x>)</td></tr>
+  <tr><td>최적 BST</td><td><x>DP</x></td><td>Θ(<x>n³</x>)</td></tr>
+  <tr><td>Prim</td><td><x>Greedy</x></td><td>Θ(<x>n²</x>)</td></tr>
+</table></div>
+<h3>세 전략 한 줄 비교</h3>
+<ul>
+  <li><b>분할정복</b>: <x>독립</x>된 작은 문제로 나눠 재귀 (<x>top-down</x>)</li>
+  <li><b>DP</b>: <x>겹치는</x> 부분 문제를 저장·재사용, <x>최적성의 원리</x> 필요 (<x>bottom-up</x>)</li>
+  <li><b>Greedy</b>: 매 순간 최선을 확정, <x>번복</x> 없음. 빠르지만 최적성 <x>검증</x> 필요</li>
+</ul>
+</section>
+
+<footer>
+  <a href="https://github.com/dnsxkm/Algorithm/blob/main/중간고사_정리/알고리즘_중간고사_핵심요약.md">핵심 요약 원문</a> · <a href="https://github.com/dnsxkm/Algorithm">GitHub</a>
+</footer>
+
+</div>
+
+<script>
+(() => {
+  // 띄어쓰기·대소문자·흔한 기호를 무시하고 비교
+  // 수식 표기 통일: 위·아래 첨자, lg/log, <=/≤, theta 등
+  const SUP = { '²':'2', '³':'3', 'ⁿ':'n', '₂':'2', 'ᵢ':'i', 'ᵏ':'k', 'ⱼ':'j', '−':'-', '–':'-', '×':'*' };
+  const unify = s => s.toLowerCase().replace(/[²³ⁿ₂ᵢᵏⱼ−–×]/g, c => SUP[c])
+    .replace(/<=/g, '≤').replace(/>=/g, '≥').replace(/!=/g, '≠').replace(/theta/g, 'θ').replace(/omega/g, 'ω')
+    .replace(/infinity|inf/g, '∞').replace(/lg/g, 'log');
+  const norm = s => unify(s).replace(/[\s·・,.\-_()（）\[\]{}'"`~/:+→^*⌊⌋]/g, '');
+  // 괄호 위치가 답인 빈칸(s 속성)은 괄호를 남긴다
+  const normS = s => unify(s).replace(/[\s·・,.\-_'"`~:+^*]/g, '');
+  const xs = [...document.querySelectorAll('x')];
+  const blanks = [];
+  const groups = {};
+
+  // 한글은 1em, 나머지는 0.62em 정도로 폭을 잡는다
+  const width = s => [...s].reduce((w, c) => w + (/[ㄱ-힣]/.test(c) ? 1 : 0.62), 0) + 1.2;
+
+  xs.forEach((x, i) => {
+    const answer = x.textContent.trim();
+    const alts = (x.getAttribute('a') || '').split('|').filter(Boolean);
+    const g = x.getAttribute('g');
+    const el = document.createElement('span');
+    el.className = 'bl';
+    el.innerHTML = '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false"><span class="ans"></span>';
+    const input = el.firstChild, ans = el.lastChild;
+    ans.textContent = answer;
+    input.style.width = el.style.minWidth = width(answer) + 'em';
+    input.setAttribute('aria-label', '빈칸 ' + (i + 1));
+    const n = x.hasAttribute('s') ? normS : norm;
+    const b = { el, input, ans, answer, n, keys: [answer, ...alts].map(n), g, state: '', matched: null };
+    if (g) (groups[g] ||= []).push(b);
+    blanks.push(b);
+    x.replaceWith(el);
+  });
+
+  // 그룹 빈칸은 아직 안 맞힌 같은 그룹 정답 중 하나와 맞으면 정답
+  const candidates = b => {
+    if (!b.g) return [b];
+    const used = new Set(groups[b.g].filter(o => o !== b && o.state === 'ok').map(o => o.matched));
+    return groups[b.g].filter(o => !used.has(o));
+  };
+
+  const set = (b, state) => {
+    b.state = state;
+    b.el.classList.toggle('ok', state === 'ok');
+    b.el.classList.toggle('bad', state === 'bad');
+    b.el.classList.toggle('shown', state === 'shown');
+    if (state === 'bad') { b.el.style.animation = 'none'; b.el.offsetWidth; b.el.style.animation = ''; }
+  };
+
+  const check = b => {
+    const v = norm(b.input.value);
+    if (!v) return false;
+    const hit = candidates(b).find(o => o.keys.includes(o.n(b.input.value)));
+    if (hit) {
+      b.matched = hit;
+      b.ans.textContent = hit.answer;
+      set(b, 'ok');
+    } else set(b, 'bad');
+    return true;
+  };
+
+  const reveal = b => {
+    if (b.g) {
+      // 그룹이면 남은 정답 중 하나를 보여 준다
+      const left = candidates(b).filter(o => !blanks.some(p => p !== b && p.g === b.g && p.state === 'shown' && p.matched === o));
+      b.matched = left[0] || b;
+      b.ans.textContent = b.matched.answer;
+    }
+    set(b, 'shown');
+  };
+
+  const hide = b => { b.matched = null; b.ans.textContent = b.answer; b.input.value = ''; set(b, ''); };
+
+  const scoreEl = document.getElementById('score'), meter = document.getElementById('meter');
+  const update = () => {
+    const ok = blanks.filter(b => b.state === 'ok').length;
+    const shown = blanks.filter(b => b.state === 'shown').length;
+    scoreEl.innerHTML = `<b>${ok}</b> 맞힘 · ${shown} 정답 확인 · 전체 ${blanks.length}`;
+    meter.style.width = (ok / blanks.length * 100) + '%';
+    document.querySelectorAll('section').forEach(sec => {
+      const mine = blanks.filter(b => sec.contains(b.el));
+      const s = sec.querySelector('h2 .sc');
+      if (s) s.textContent = `${mine.filter(b => b.state === 'ok').length}/${mine.length}`;
+    });
+  };
+
+  const next = b => {
+    const i = blanks.indexOf(b);
+    const n = blanks.slice(i + 1).find(o => o.state !== 'ok' && o.state !== 'shown');
+    if (n) n.input.focus();
+  };
+
+  blanks.forEach(b => {
+    b.input.addEventListener('keydown', e => {
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (b.state === 'bad' && norm(b.input.value) === b.lastTry) { reveal(b); next(b); }
+        else if (check(b)) { b.lastTry = norm(b.input.value); if (b.state === 'ok') next(b); }
+        else { reveal(b); next(b); }
+        update();
+      } else if (e.key === 'Escape') { reveal(b); update(); next(b); }
+    });
+    b.input.addEventListener('input', () => { if (b.state === 'bad') set(b, ''); });
+    b.el.addEventListener('click', () => {
+      if (!document.body.classList.contains('tap')) return;
+      if (b.state === 'shown') hide(b); else if (b.state !== 'ok') reveal(b);
+      update();
+    });
+  });
+
+  // 섹션별 점수와 "정답 보기" 버튼
+  document.querySelectorAll('section').forEach(sec => {
+    const h = sec.querySelector('h2');
+    const sc = document.createElement('span'); sc.className = 'sc'; h.append(sc);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn rv'; btn.textContent = '이 섹션 정답';
+    let on = false;
+    btn.addEventListener('click', () => {
+      on = !on;
+      blanks.filter(b => sec.contains(b.el) && b.state !== 'ok').forEach(b => on ? reveal(b) : hide(b));
+      btn.textContent = on ? '다시 가리기' : '이 섹션 정답';
+      update();
+    });
+    h.append(btn);
+  });
+
+  const allBtn = document.getElementById('all-show');
+  let allOn = false;
+  allBtn.addEventListener('click', () => {
+    allOn = !allOn;
+    blanks.filter(b => b.state !== 'ok').forEach(b => allOn ? reveal(b) : hide(b));
+    allBtn.textContent = allOn ? '모두 다시 가리기' : '정답 모두 보기';
+    update();
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    blanks.forEach(hide); allOn = false; allBtn.textContent = '정답 모두 보기';
+    document.querySelectorAll('.rv').forEach(b => b.textContent = '이 섹션 정답');
+    update(); window.scrollTo({ top: 0 });
+  });
+
+  // 모드 전환 (탭 모드는 휴대폰 기본값)
+  const mType = document.getElementById('m-type'), mTap = document.getElementById('m-tap');
+  const setMode = tap => {
+    document.body.classList.toggle('tap', tap);
+    mType.setAttribute('aria-pressed', !tap); mTap.setAttribute('aria-pressed', tap);
+    blanks.forEach(b => b.el.tabIndex = tap ? 0 : -1);
+    try { localStorage.setItem('algo-blank-mode', tap ? 'tap' : 'type'); } catch (e) {}
+  };
+  mType.addEventListener('click', () => setMode(false));
+  mTap.addEventListener('click', () => setMode(true));
+  document.addEventListener('keydown', e => {
+    if (document.body.classList.contains('tap') && e.target.classList?.contains('bl') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.target.click(); }
+  });
+  let saved = null;
+  try { saved = localStorage.getItem('algo-blank-mode'); } catch (e) {}
+  setMode(saved ? saved === 'tap' : matchMedia('(pointer:coarse)').matches);
+  update();
+})();
+</script>
+</body>
+</html>
